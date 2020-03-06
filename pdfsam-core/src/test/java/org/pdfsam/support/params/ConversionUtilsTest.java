@@ -105,6 +105,13 @@ public class ConversionUtilsTest {
         assertEquals("Inclusive set should start at 2", 2, pageSetMerge.stream().findFirst().get().getStart());
         assertEquals("Inclusive set should end at 10", 10, pageSetMerge.stream().findFirst().get().getEnd());
 
+        Set<PageRange> pageSet2Merge = ConversionUtils.toPageRangeSet("1-5,4-10,7,15");
+        assertEquals("Inclusive sets should merge to two", 2, pageSet2Merge.size());
+        assertEquals("Inclusive set should start at 1", 1, pageSet2Merge.stream().findFirst().get().getStart());
+        assertEquals("Inclusive set should end at 10", 10, pageSet2Merge.stream().findFirst().get().getEnd());
+        assertTrue("Should include page 15",
+                pageSet2Merge.stream().anyMatch(range->range.getStart() == 15 && range.getEnd() == 15));
+
         Set<PageRange> pageSetMergeTriple = ConversionUtils.toPageRangeSet("1-4,3-6,7-10");
         assertEquals("Triple set case should merge to 1", 1, pageSetMergeTriple.size());
         assertEquals("Triple set merge should start at 1", 1, pageSetMergeTriple.stream().findFirst().get().getStart());
@@ -114,5 +121,10 @@ public class ConversionUtilsTest {
         assertEquals("All case should merge to 1", 1, pageSetMergeAll.size());
         assertEquals("All case should start at 1", 1, pageSetMergeAll.stream().findFirst().get().getStart());
         assertTrue("All case should be unbounded", pageSetMergeAll.stream().findFirst().get().isUnbounded());
+
+        Set<PageRange> pageSetBackwarsd = ConversionUtils.toPageRangeSet("10,9,8,7,6,5,4,3,2,1");
+        assertEquals("Backward case should merge to 1", 1, pageSetBackwarsd.size());
+        assertEquals("Backward case should start at 1", 1, pageSetBackwarsd.stream().findFirst().get().getStart());
+        assertEquals("Backward case should end at 10", 10, pageSetBackwarsd.stream().findFirst().get().getEnd());
     }
 }

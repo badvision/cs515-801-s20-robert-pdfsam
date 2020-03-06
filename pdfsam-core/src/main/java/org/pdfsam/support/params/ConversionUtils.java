@@ -100,8 +100,8 @@ public final class ConversionUtils {
                 lastEnd = pageNumber;
             } else {
                 normalizedRanges.add(new PageRange(lastStart, lastEnd));
-                lastStart = -1;
-                lastEnd = -1;
+                lastStart = pageNumber;
+                lastEnd = pageNumber;
             }
         }
 

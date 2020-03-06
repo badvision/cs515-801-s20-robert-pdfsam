@@ -51,41 +51,36 @@ public class ConversionUtilsTest {
     public void singlePage() {
         Set<PageRange> pageSet = ConversionUtils.toPageRangeSet("5");
         assertEquals(1, pageSet.size());
-        assertEquals(5, pageSet.stream().findFirst().get().getStart());
-        assertEquals(5, pageSet.stream().findFirst().get().getEnd());
+        assertContainsRange(pageSet, 5, 5);
     }
 
     @Test
     public void rangePage() {
         Set<PageRange> pageSet = ConversionUtils.toPageRangeSet("5-10");
         assertEquals(1, pageSet.size());
-        assertEquals(5, pageSet.stream().findFirst().get().getStart());
-        assertEquals(10, pageSet.stream().findFirst().get().getEnd());
+        assertContainsRange(pageSet, 5, 10);
     }
 
     @Test
     public void endPage() {
         Set<PageRange> pageSet = ConversionUtils.toPageRangeSet("-10");
         assertEquals(1, pageSet.size());
-        assertEquals(1, pageSet.stream().findFirst().get().getStart());
-        assertEquals(10, pageSet.stream().findFirst().get().getEnd());
+        assertContainsRange(pageSet, 1, 10);
     }
 
     @Test
     public void startPage() {
         Set<PageRange> pageSet = ConversionUtils.toPageRangeSet("10-");
         assertEquals(1, pageSet.size());
-        assertEquals(10, pageSet.stream().findFirst().get().getStart());
-        assertTrue(pageSet.stream().findFirst().get().isUnbounded());
+        assertContainsUnboundedRange(pageSet, 10);
     }
 
     @Test
     public void multiple() {
         Set<PageRange> pageSet = ConversionUtils.toPageRangeSet("2-4,10-");
         assertEquals(2, pageSet.size());
-        assertEquals(2, pageSet.stream().findFirst().get().getStart());
-        assertEquals(4, pageSet.stream().findFirst().get().getEnd());
-        assertTrue(pageSet.stream().anyMatch(PageRange::isUnbounded));
+        assertContainsRange(pageSet, 2, 4);
+        assertContainsUnboundedRange(pageSet, 10);
     }
 
     public static void assertContainsRange(Set<PageRange> pages, int start, int end) {

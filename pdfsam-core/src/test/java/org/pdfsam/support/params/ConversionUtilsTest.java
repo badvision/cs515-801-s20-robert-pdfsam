@@ -88,43 +88,51 @@ public class ConversionUtilsTest {
         assertTrue(pageSet.stream().anyMatch(PageRange::isUnbounded));
     }
 
+    public static void assertContainsRange(Set<PageRange> pages, int start, int end) {
+        assertTrue(String.format("Should include range %s-%s", start, end),
+                pages.stream().anyMatch(range -> range.getStart() == start && range.getEnd() == end));
+    }
+
+    public static void assertContainsUnboundedRange(Set<PageRange> pages, int start) {
+        assertTrue(String.format("Should include unbounded range starting at %s", start),
+                pages.stream().anyMatch(range -> range.getStart() == start && range.isUnbounded()));
+    }
+
     @Test
     public void normalizeRanges() {
         Set<PageRange> pageSetAdjacent = ConversionUtils.toPageRangeSet("2-4,5-6");
         assertEquals("Adjacent sets should merge to one", 1, pageSetAdjacent.size());
-        assertEquals("New adjacent set should start at 2", 2, pageSetAdjacent.stream().findFirst().get().getStart());
-        assertEquals("New adjacent set should end at 6", 6, pageSetAdjacent.stream().findFirst().get().getEnd());
+        assertContainsRange(pageSetAdjacent, 2, 6);
 
         Set<PageRange> pageSetAdjacentUnbounded = ConversionUtils.toPageRangeSet("2-4,5-");
         assertEquals("Adjacent unbounded sets should merge to one", 1, pageSetAdjacentUnbounded.size());
-        assertEquals("New adjacent unbounded set should start at 2", 2, pageSetAdjacentUnbounded.stream().findFirst().get().getStart());
-        assertTrue("New adjacent unbounded set should be unbounded", pageSetAdjacentUnbounded.stream().findFirst().get().isUnbounded());
+        assertContainsUnboundedRange(pageSetAdjacentUnbounded, 2);
 
         Set<PageRange> pageSetMerge = ConversionUtils.toPageRangeSet("2-10,5,7");
         assertEquals("Inclusive sets should merge to one", 1, pageSetMerge.size());
-        assertEquals("Inclusive set should start at 2", 2, pageSetMerge.stream().findFirst().get().getStart());
-        assertEquals("Inclusive set should end at 10", 10, pageSetMerge.stream().findFirst().get().getEnd());
+        assertContainsRange(pageSetMerge, 2, 10);
 
         Set<PageRange> pageSet2Merge = ConversionUtils.toPageRangeSet("1-5,4-10,7,15");
         assertEquals("Inclusive sets should merge to two", 2, pageSet2Merge.size());
-        assertEquals("Inclusive set should start at 1", 1, pageSet2Merge.stream().findFirst().get().getStart());
-        assertEquals("Inclusive set should end at 10", 10, pageSet2Merge.stream().findFirst().get().getEnd());
-        assertTrue("Should include page 15",
-                pageSet2Merge.stream().anyMatch(range->range.getStart() == 15 && range.getEnd() == 15));
+        assertContainsRange(pageSet2Merge, 1, 10);
+        assertContainsRange(pageSet2Merge, 15, 15);
+
+        Set<PageRange> pageSet3Merge = ConversionUtils.toPageRangeSet("5,9-14,13-20,10,25");
+        assertEquals("Inclusive sets should merge to three", 3, pageSet3Merge.size());
+        assertContainsRange(pageSet3Merge, 5, 5);
+        assertContainsRange(pageSet3Merge, 9, 20);
+        assertContainsRange(pageSet3Merge, 25, 25);
 
         Set<PageRange> pageSetMergeTriple = ConversionUtils.toPageRangeSet("1-4,3-6,7-10");
         assertEquals("Triple set case should merge to 1", 1, pageSetMergeTriple.size());
-        assertEquals("Triple set merge should start at 1", 1, pageSetMergeTriple.stream().findFirst().get().getStart());
-        assertEquals("Triple set merge should end at 10", 10, pageSetMergeTriple.stream().findFirst().get().getEnd());
+        assertContainsRange(pageSetMergeTriple, 1, 10);
 
         Set<PageRange> pageSetMergeAll = ConversionUtils.toPageRangeSet("1-,3-6,7-10,100");
         assertEquals("All case should merge to 1", 1, pageSetMergeAll.size());
-        assertEquals("All case should start at 1", 1, pageSetMergeAll.stream().findFirst().get().getStart());
-        assertTrue("All case should be unbounded", pageSetMergeAll.stream().findFirst().get().isUnbounded());
+        assertContainsUnboundedRange(pageSetMergeAll, 1);
 
         Set<PageRange> pageSetBackwarsd = ConversionUtils.toPageRangeSet("10,9,8,7,6,5,4,3,2,1");
         assertEquals("Backward case should merge to 1", 1, pageSetBackwarsd.size());
-        assertEquals("Backward case should start at 1", 1, pageSetBackwarsd.stream().findFirst().get().getStart());
-        assertEquals("Backward case should end at 10", 10, pageSetBackwarsd.stream().findFirst().get().getEnd());
+        assertContainsRange(pageSetBackwarsd, 1, 10);
     }
 }
